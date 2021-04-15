@@ -1,0 +1,36 @@
+{
+"update_url": "https://clients2.google.com/service/update2/crx",
+
+  "name": "Playlist Search for YouTube™",
+  "version": "1.0.0.8",
+  "description": "Instantly search inside any YouTube™ playlist.",
+  "background": {
+    "scripts": ["/js/background.js", "/js/jquery.min.js", "/js/jquery.min.js", "/js/popup.js"],
+    "persistent": false,
+    "pages": ["popup.html"]
+  },
+  "page_action" :
+  {
+    "default_title" : "Search this playlist",
+    "default_popup" : "popup.html"
+  },
+  "icons": {
+    "48": "/img/icon-48.png",
+    "128": "/img/icon-128.png"
+  },
+  "permissions" : [
+    "declarativeContent",
+    "tabs",
+    "identity",
+    "http://www.youtube.com/*",
+    "https://www.youtube.com/*"
+  ],
+  "oauth2": {
+    "client_id": "915927501400-0ptlebbjprdfqts713hlutok1kplu2a8.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/youtube.readonly"
+    ]
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAps65nbsGLdA55FuGZlpzPiZOdV+umwFK4gFOYnUDVcqp6NQ8OxGY5+qQ40tFlBgrwAbhCknHumgFQJyQBnYUhJNSO5macvXjXi1Fg6ZwWoaglQbbmXUWmXFsBq5DwR514qT/0ER70n35RpM1u7fgMGga8yHm3l3YjVRoEuN7qqHj1mRN3EbHnZUQbCT91JhZqfhaVkEEAvsznCZ3xbKDhCydSs5753cEk0tWeVFkTfE74FIoV9vi1nDHS2qjtcaNQSUmOTeBys6hZkXRgPDQl5NWwFd6xx85txQ4sbDMX0WNR9Qc/IAZlhigxaGr/UD0qTz0GpIRGU0KkNQEs/lw5wIDAQAB",
+  "manifest_version": 2
+}
