@@ -83,21 +83,12 @@ function addVideoToList(videoName, videoURL)
     }
 }
 
-function getParameterByName(name, url) {
-    name = name.replace(/[\[\]]/g, "\\$&");
-    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-    results = regex.exec(url);
-    if (!results)
-    {
-        return null;
-    }
+function getParameterByName(url) {
+    const urlObj = new URL(url);
+    const search = urlObj.search;
+    const searchObj = new URLSearchParams(search);
 
-    if (!results[2])
-    {
-        return '';
-    }
-
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
+    return searchObj.get('list');
 }
 
 // fills videos with more results from next page until no more pages left
@@ -148,8 +139,9 @@ function addResult(videoTitle, videoID, playlistID) {
 }
 
 function showError(message) {
-    alert(e);
-    console.error(e);
+    document.body.classList.add('error');
+    document.body.innerText = message;
+    console.error(message);
 }
 
 chrome.tabs.query(
@@ -159,24 +151,26 @@ chrome.tabs.query(
     },
     tabs =>
     {
-        var url = tabs[0].url;
-        var playlistID = getParameterByName("list", url);
+        const url = tabs[0].url;
+        const playlistID = getParameterByName(url);
 
         // handle deprecated playlist access
-        if (playlistID == "WL"){
+        if (playlistID == "WL")
+        {
             showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
-            return;
         }
-
-        chrome.identity.getAuthToken(
-            {
-                'interactive': true
-            },
-            async token =>
-            {
-                await fillList(playlistID, token, null);
-                makeLinksClickable()
-            }
-        );
+        else
+        {
+            chrome.identity.getAuthToken(
+                {
+                    'interactive': true
+                },
+                async token =>
+                {
+                    await fillList(playlistID, token, null);
+                    makeLinksClickable()
+                }
+            );
+        }
     }
 );

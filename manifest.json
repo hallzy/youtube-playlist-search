@@ -5,7 +5,7 @@
   "version": "1.0.0.8",
   "description": "Instantly search inside any YouTube™ playlist.",
   "background": {
-    "scripts": ["/js/background.js", "/js/jquery.min.js", "/js/jquery.min.js", "/js/popup.js"],
+    "scripts": ["/js/background.js", "/js/popup.js"],
     "persistent": false,
     "pages": ["popup.html"]
   },
