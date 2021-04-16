@@ -3,6 +3,8 @@
 This started as a copy of the "Playlist Search For YouTube" extension, but I am
 cleaning it up and customizing it to my liking.
 
+![Screenshot](screenshot.png)
+
 ## Customizations
 
 - Searching is now more 'fuzzy', so it searches words individually instead of
@@ -26,6 +28,8 @@ developer now and honestly, I can't be bothered.
 So, to install this extension:
 
 * Download, or clone this repository
+* For the 'Brave Browser' only, enable the setting "Allow Google login for
+  extensions" and restart the browser
 * Open the 'Extensions' page in Chrome settings
 * Toggle 'Developer mode' on (this should be in the top right corner)
 * Click "Load Unpacked"
