@@ -1,10 +1,20 @@
+:root {
+    --top-bar-bg: #181a1b;
+    --input-border-color: #303030;
+    --input-bg: #0e0f0f;
+    --bg: #121414;
+    --scroll-track: #202324;
+    --scroll-bar: #575e62;
+    --title-color: #e8e6e3;
+    --channel-color: #a5a096;
+    --video-hover-bg: #484848;
+}
+
 html, body {
-    background-color: #f9f9f9;
-    max-width: 500px;
-    max-height: 438px;
-    margin: 0px !important;
-    overflow-x: hidden;
-    overflow-y: hidden;
+    background-color: var(--bg);
+    width: 500px;
+    max-height: 500px;
+    margin: 0px;
 }
 
 .error {
@@ -14,108 +24,60 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-    background-color: #F5F5F5;
+    background-color: var(--scroll-track);
 }
 
 ::-webkit-scrollbar {
-    width: 6px;
-    background-color: #F5F5F5;
+    width: 8px;
+    background-color: var(--scroll-bar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #b31217;
+    background-color: var(--scroll-bar);
+    border-radius: 10px;
 }
 
 #menu {
-    text-align: left;
-    background-color: #ffffff;
+    background-color: var(--top-bar-bg);
     padding: 10px 5px 5px 0px;
     height: 30px;
 }
 #query {
-    width: 455px;
+    background-color: var(--input-bg);
+    width: calc(100% - 45px);
     padding: 8.5px 15px;
     margin: 5px;
-    color: #767676;
-    border: 2px solid #CCCCCC;
+    color: white;
+    border: 1px solid var(--input-border-color);
     position: fixed;
     top: 0px;
 }
-#query:focus{
-    border-color: #2980b9;
-}
 
-
-.list {
-    padding: 0px 15px 0px 5px;
-    color: grey;
-    float: left;
-    display: block;
-    width: 500px;
-    float: left;
-    display: block;
+.video-list {
     margin: 0;
-    overflow: auto;
     list-style-type: none;
     padding: 0;
-    border: 1px solid #ddd;
-    border-right: 0px;
-    border-left: 0px;
     margin-left: 5px;
 }
 
-ul li {
-    border-bottom: 1px solid #ddd;
+.video-list li {
+    padding: 10px;
+    overflow-x: hidden;
 }
-
-ul li:hover {
-    background-color: #cccccc;
-}
-
-ul li:last-child {
-    border-bottom: none;
+.video-list li:hover {
+    background-color: var(--video-hover-bg);
 }
 
 #scrollable {
-    width: 495px;
-    max-height: 390px;
+    max-height: 455px;
     overflow-y: auto;
-    margin-bottom: 2.5px;
-    overflow-x: hidden;
 }
 
-li a {
+.video-link {
     font-size: 13px;
-    font-weight: normal;
-    margin: 0px;
-    margin-right: 10px;
-    padding: 8px 16px;
     display: block;
-    width: 456px;
-    height: 100%;
-}
-
-a:link {
-    color: #767676;
+    text-decoration: none;
     font-weight: bold;
-    text-decoration: none;
-}
-
-a:visited {
-    color: #003366;
-    text-decoration: none;
-}
-
-a:hover {
-    color: black;
-}
-
-a:active {
-}
-
-li {
-    padding: 0px;
-    overflow-x: hidden;
 }
 
 .channel,
@@ -125,14 +87,24 @@ li {
 }
 
 .channel {
-    color: black;
+    font-weight: lighter;
+    color: var(--channel-color);
+    padding-top: 0.3em;
+    margin-bottom: 0.2em;
 }
 
 .title {
-    font-weight: lighter;
+    color: var(--title-color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 0.2em;
 }
 
-a img {
-    height: 3em;
+.thumbnail {
+    display: inline-block;
     float: left;
+}
+
+.thumbnail img {
+    height: 5em;
 }

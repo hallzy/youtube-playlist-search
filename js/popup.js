@@ -1,12 +1,6 @@
 function makeLinksClickable()
 {
-    document.querySelectorAll('ul.list a')
-        .forEach(
-            el => {
-                addClickHandler(el);
-            }
-        );
-    ;
+    document.querySelectorAll('.video-list a').forEach( el => addClickHandler(el));
 }
 
 function addClickHandler(el)
@@ -32,15 +26,20 @@ function openVideo(url)
     );
 }
 
-const filterInput = document.querySelector('input');
-filterInput.addEventListener(
-    'change',
-    (event) =>
+const filterInput = document.querySelectorAll('input');
+filterInput.forEach(
+    el =>
     {
-        const searchWords = event.target.value.split(' ');
-        updateVideoList(searchWords);
+        addEventListener(
+            'change',
+            (event) =>
+            {
+                const searchWords = event.target.value.split(' ');
+                updateVideoList(searchWords);
+            }
+        );
     }
-);
+)
 
 function createElementFromHTML(htmlString) {
     const div = document.createElement('div');
@@ -68,25 +67,34 @@ function updateVideoList(searchWords) {
 function addVideoToList(videoName, channelName, videoURL, thumbnailURL)
 {
     let img = '';
+    let channel = '';
+
     if (thumbnailURL)
     {
         img = `
-            <div><img src='${thumbnailURL}'></div>
+            <div class='thumbnail'><img src='${thumbnailURL}'></div>
+        `;
+    }
+
+    if (channelName)
+    {
+        channel = `
+            <div class='channel'>${channelName}</div>
         `;
     }
 
     const html = `
         <li>
-            <a href='${videoURL}' class='link title'>
+            <a href='${videoURL}' class='video-link'>
                 ${img}
-                <div class='channel'>${channelName}</div>
                 <div class='title'>${videoName}</div>
+                ${channel}
             </a>
         </li>
     `;
 
     const anchor = createElementFromHTML(html);
-    document.querySelector('ul.list').appendChild(anchor);
+    document.querySelector('.video-list').appendChild(anchor);
 
     const loading = document.querySelector('#loading')
     if (loading)
@@ -123,7 +131,7 @@ async function fillList(playlistID, token, nextPage)
     const response = await fetch(requestURL, settings);
     const json = await response.json();
 
-    const items = json.items;
+    const items = json.items ?? [];
 
     items.forEach(
         item =>
