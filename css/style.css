@@ -58,13 +58,15 @@ html, body {
     list-style-type: none;
     padding: 0;
     margin-left: 5px;
+    font-weight: bold;
+    font-size: 13px;
 }
 
 .video-list li {
     padding: 10px;
     overflow-x: hidden;
 }
-.video-list li:hover {
+.video-list li:not(#loading):hover {
     background-color: var(--video-hover-bg);
 }
 
@@ -74,10 +76,8 @@ html, body {
 }
 
 .video-link {
-    font-size: 13px;
     display: block;
     text-decoration: none;
-    font-weight: bold;
 }
 
 .channel,
@@ -111,4 +111,9 @@ html, body {
 
 .container {
     border: 3px solid #7f7f7f;
+}
+
+.msg {
+    color: white;
+    text-align: center;
 }
