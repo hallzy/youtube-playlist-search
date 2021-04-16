@@ -17,4 +17,6 @@ cleaning it up and customizing it to my liking.
 
 ## TODO
 
-* Cleanup CSS and fix the styling
+* Cleanup CSS and fix/improve the styling
+* Add a spinner, and display it whenever something is loading
+* Add to Chrome Extension Store
