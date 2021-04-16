@@ -39,18 +39,18 @@ html, body {
 
 #menu {
     background-color: var(--top-bar-bg);
-    padding: 10px 5px 5px 0px;
-    height: 30px;
+    padding: 10px;
+    height: 35px;
+    top: 3px;
+    right: 3px;
+    width: calc(100% - 26px);
 }
 #query {
     background-color: var(--input-bg);
-    width: calc(100% - 45px);
+    width: calc(100% - 31px);
     padding: 8.5px 15px;
-    margin: 5px;
     color: white;
     border: 1px solid var(--input-border-color);
-    position: fixed;
-    top: 0px;
 }
 
 .video-list {
@@ -107,4 +107,8 @@ html, body {
 
 .thumbnail img {
     height: 5em;
+}
+
+.container {
+    border: 3px solid #7f7f7f;
 }
