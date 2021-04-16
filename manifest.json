@@ -1,9 +1,9 @@
 {
 "update_url": "https://clients2.google.com/service/update2/crx",
 
-  "name": "Playlist Search for YouTube™",
-  "version": "1.0.0.8",
-  "description": "Instantly search inside any YouTube™ playlist.",
+  "name": "Search YouTube™ Playlist",
+  "version": "21.04.01",
+  "description": "Search for videos in a YouTube™ playlist.",
   "background": {
     "scripts": ["/js/background.js", "/js/popup.js"],
     "persistent": false,

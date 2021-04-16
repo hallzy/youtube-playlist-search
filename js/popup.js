@@ -65,11 +65,23 @@ function updateVideoList(searchWords) {
     );
 }
 
-function addVideoToList(videoName, videoURL)
+function addVideoToList(videoName, channelName, videoURL, thumbnailURL)
 {
+    let img = '';
+    if (thumbnailURL)
+    {
+        img = `
+            <div><img src='${thumbnailURL}'></div>
+        `;
+    }
+
     const html = `
         <li>
-            <a href='${videoURL}' class='link title'>${videoName}</a>
+            <a href='${videoURL}' class='link title'>
+                ${img}
+                <div class='channel'>${channelName}</div>
+                <div class='title'>${videoName}</div>
+            </a>
         </li>
     `;
 
@@ -91,57 +103,76 @@ function getParameterByName(url) {
     return searchObj.get('list');
 }
 
-// fills videos with more results from next page until no more pages left
-async function fillList(playlistID, oauth_token, next_page_token)
+async function fillList(playlistID, token, nextPage)
 {
     let pageToken = "";
 
-    if (next_page_token)
+    if (nextPage)
     {
-        pageToken = `&pageToken=${next_page_token}`;
+        pageToken = `&pageToken=${nextPage}`;
     }
-    const requestURL = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=" + playlistID + pageToken + "&access_token=" + oauth_token;
+    const requestURL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistID}${pageToken}&access_token=${token}`;
 
     const settings = {
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'OAuth ' + oauth_token,
+            'Authorization': `OAuth ${token}`,
         }
     };
 
-    try
-    {
-        const response = await fetch(requestURL, settings);
-        const json = await response.json();
+    const response = await fetch(requestURL, settings);
+    const json = await response.json();
 
-        const items = json.items;
+    const items = json.items;
 
-        for (var i = 0; i < items.length; i++){
-            const videoTitle = items[i].snippet.title;
-            const videoID =  items[i].snippet.resourceId.videoId;
-            addResult(videoTitle, videoID, playlistID);
+    items.forEach(
+        item =>
+        {
+            const videoTitle = item.snippet.title;
+            const videoID =  item.snippet.resourceId.videoId;
+            const channelName = item.snippet.videoOwnerChannelTitle;
+            console.log(item.snippet.thumbnails);
+
+            const thumbnails = item.snippet.thumbnails;
+
+            const thumbnail = thumbnails.medium ?? thumbnails.high ?? thumbnails.standard ?? thumbnails.maxres ?? thumbnails.default ?? {};
+            const thumbnailURL = thumbnail?.url;
+
+            const videoURL = `https://www.youtube.com/watch?v=${videoID}&list=${playlistID}`;
+            addVideoToList(videoTitle, channelName, videoURL, thumbnailURL)
         }
+    );
 
-        if (typeof json.nextPageToken !== "undefined"){
-            fillList(playlistID, oauth_token, json.nextPageToken);
-        }
+    if (typeof json.nextPageToken !== "undefined"){
+        fillList(playlistID, token, json.nextPageToken);
     }
-    catch(e)
-    {
-        showError(e);
-    }
-}
-
-function addResult(videoTitle, videoID, playlistID) {
-    const videoURL = "https://www.youtube.com/watch?v=" + videoID + "&list=" + playlistID;
-
-    addVideoToList(videoTitle, videoURL)
 }
 
 function showError(message) {
     document.body.classList.add('error');
     document.body.innerText = message;
     console.error(message);
+}
+
+function populatePopup(playlistID)
+{
+    chrome.identity.getAuthToken(
+        {
+            'interactive': true
+        },
+        async token =>
+        {
+            try
+            {
+                await fillList(playlistID, token);
+                makeLinksClickable()
+            }
+            catch(e)
+            {
+                showError(e);
+            }
+        }
+    );
 }
 
 chrome.tabs.query(
@@ -154,23 +185,13 @@ chrome.tabs.query(
         const url = tabs[0].url;
         const playlistID = getParameterByName(url);
 
-        // handle deprecated playlist access
         if (playlistID == "WL")
         {
             showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
         }
         else
         {
-            chrome.identity.getAuthToken(
-                {
-                    'interactive': true
-                },
-                async token =>
-                {
-                    await fillList(playlistID, token, null);
-                    makeLinksClickable()
-                }
-            );
+            populatePopup(playlistID);
         }
     }
 );

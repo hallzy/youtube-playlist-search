@@ -117,3 +117,22 @@ li {
     padding: 0px;
     overflow-x: hidden;
 }
+
+.channel,
+.title {
+    overflow: hidden;
+    padding-left: 1ch;
+}
+
+.channel {
+    color: black;
+}
+
+.title {
+    font-weight: lighter;
+}
+
+a img {
+    height: 3em;
+    float: left;
+}
