@@ -1,118 +1,182 @@
-// handles link clicks from popup
-$('body').on('click', 'a', function(e) {
-    var href = e.currentTarget.href;
-    chrome.tabs.getSelected(null,function(tab) {
-        chrome.tabs.update(tab.id, {url: href});
-    });
-});
+function makeLinksClickable()
+{
+    document.querySelectorAll('ul.list a')
+        .forEach(
+            el => {
+                addClickHandler(el);
+            }
+        );
+    ;
+}
 
-// get value of parameter from url (from http://stackoverflow.com/a/901144/5179469)
+function addClickHandler(el)
+{
+    el.addEventListener(
+        'click',
+        (e) =>
+        {
+            const url = e.currentTarget.href;
+            openVideo(url);
+        }
+    );
+}
+
+function openVideo(url)
+{
+    chrome.tabs.getSelected(
+        null,
+        tab =>
+        {
+            chrome.tabs.update(tab.id, { url });
+        }
+    );
+}
+
+const filterInput = document.querySelector('input');
+filterInput.addEventListener(
+    'change',
+    (event) =>
+    {
+        const searchWords = event.target.value.split(' ');
+        updateVideoList(searchWords);
+    }
+);
+
+function createElementFromHTML(htmlString) {
+    const div = document.createElement('div');
+    div.innerHTML = htmlString.trim();
+
+    return div.firstChild;
+}
+
+function updateVideoList(searchWords) {
+    const videosInList = document.querySelectorAll('li a');
+
+    searchWords = searchWords.map(word => word.toLowerCase());
+
+    videosInList.forEach(
+        videoEl =>
+        {
+            const videoName = videoEl.innerText.toLowerCase();;
+            const videoMatches = searchWords.every(word => videoName.indexOf(word) !== -1);
+
+            videoEl.parentElement.hidden = !videoMatches;
+        }
+    );
+}
+
+function addVideoToList(videoName, videoURL)
+{
+    const html = `
+        <li>
+            <a href='${videoURL}' class='link title'>${videoName}</a>
+        </li>
+    `;
+
+    const anchor = createElementFromHTML(html);
+    document.querySelector('ul.list').appendChild(anchor);
+
+    const loading = document.querySelector('#loading')
+    if (loading)
+    {
+        loading.remove();
+    }
+}
+
 function getParameterByName(name, url) {
     name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
     results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
+    if (!results)
+    {
+        return null;
+    }
+
+    if (!results[2])
+    {
+        return '';
+    }
+
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
 // fills videos with more results from next page until no more pages left
-function fillList(playlistID, oauth_token, next_page_token, videos){
-    var xhr = new XMLHttpRequest();
-    request_url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=" + playlistID + "&pageToken=" + next_page_token + "&access_token=" + oauth_token;
-    xhr.open("GET", request_url, true); // ASYNC
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Authorization', 'OAuth ' + oauth_token);
-    xhr.onload = function (e) {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                var result = xhr.responseText;
-                var jsonResponse = JSON.parse(result);
-                var items = jsonResponse["items"];
+async function fillList(playlistID, oauth_token, next_page_token)
+{
+    let pageToken = "";
 
-                for (var i = 0; i < items.length; i++){
-                    addResult(items[i].snippet.title, items[i].snippet.resourceId.videoId, playlistID, videos);
-                }
+    if (next_page_token)
+    {
+        pageToken = `&pageToken=${next_page_token}`;
+    }
+    const requestURL = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=" + playlistID + pageToken + "&access_token=" + oauth_token;
 
-                if (typeof jsonResponse.nextPageToken !== "undefined"){
-                    fillList(playlistID, oauth_token, jsonResponse.nextPageToken, videos);
-                }
-            }
+    const settings = {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'OAuth ' + oauth_token,
         }
     };
-    xhr.onerror = function (e) {
-        showError("Connection error.");
-    };
-    xhr.send(null);
+
+    try
+    {
+        const response = await fetch(requestURL, settings);
+        const json = await response.json();
+
+        const items = json.items;
+
+        for (var i = 0; i < items.length; i++){
+            const videoTitle = items[i].snippet.title;
+            const videoID =  items[i].snippet.resourceId.videoId;
+            addResult(videoTitle, videoID, playlistID);
+        }
+
+        if (typeof json.nextPageToken !== "undefined"){
+            fillList(playlistID, oauth_token, json.nextPageToken);
+        }
+    }
+    catch(e)
+    {
+        showError(e);
+    }
 }
 
+function addResult(videoTitle, videoID, playlistID) {
+    const videoURL = "https://www.youtube.com/watch?v=" + videoID + "&list=" + playlistID;
 
-function addResult(video_title, video_id, playlist_id, videos) {
-    videos.add({
-        link: "https://www.youtube.com/watch?v=" + video_id + "&list=" + playlist_id,
-        title: video_title
-    });
+    addVideoToList(videoTitle, videoURL)
 }
 
 function showError(message) {
-    document.getElementById("content").innerHTML = message;
-    document.getElementById("content").style = "text-align: center; max-width: 600px;overflow: hidden;white-space: nowrap;";
+    alert(e);
+    console.error(e);
 }
 
-chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
-    var options = {
-        valueNames: [
-        { name: 'link', attr: 'href' },
-        'title'
-        ]
-    };
+chrome.tabs.query(
+    {
+        'active': true,
+        'currentWindow': true
+    },
+    tabs =>
+    {
+        var url = tabs[0].url;
+        var playlistID = getParameterByName("list", url);
 
-    var videos = new List('videos', options);
+        // handle deprecated playlist access
+        if (playlistID == "WL"){
+            showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
+            return;
+        }
 
-    var url = tabs[0].url;
-    var playlistID = getParameterByName("list", url);
-
-    // handle deprecated playlist access
-    if (playlistID == "WL"){
-        showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
+        chrome.identity.getAuthToken(
+            {
+                'interactive': true
+            },
+            async token =>
+            {
+                await fillList(playlistID, token, null);
+                makeLinksClickable()
+            }
+        );
     }
-
-    else {
-        chrome.identity.getAuthToken({ 'interactive': true}, function(token) {
-            var xhr = new XMLHttpRequest();
-            request_url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=" + playlistID + "&access_token=" + token;
-            xhr.open("GET", request_url, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('Authorization', 'OAuth ' + token);
-            xhr.onload = function (e) {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        var result = xhr.responseText;
-                        var jsonResponse = JSON.parse(result);
-                        var items = jsonResponse["items"];
-
-                        // add first page of results to videos
-                        for (var i = 0; i < items.length; i++){
-                            addResult(items[i].snippet.title, items[i].snippet.resourceId.videoId, playlistID, videos);
-                        }
-
-                        // fill rest of list if there are more results to load
-                        if (jsonResponse.nextPageToken != ""){
-                            fillList(playlistID, token, jsonResponse.nextPageToken, videos);
-                        }
-
-                        videos.remove("link", "#"); // remove loading entry in list that is required to init the list via list.js
-
-                    } else {
-                        showError("Invalid playlist.");
-                    }
-                }
-            };
-            xhr.onerror = function (e) {
-                showError("Connection error.");
-            };
-            xhr.send(null);
-
-        });
-    } //else
-});
+);
