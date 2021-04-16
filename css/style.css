@@ -43,7 +43,7 @@ html, body {
     height: 35px;
     top: 3px;
     right: 3px;
-    width: calc(100% - 26px);
+    width: calc(100% - 20px);
 }
 #query {
     background-color: var(--input-bg);
