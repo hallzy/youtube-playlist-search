@@ -1,4 +1,8 @@
 :root {
+    /* These are the max dimensions of a popup window for a chrome extension */
+    --max-height: 600px;
+    --max-width: 800px;
+
     --top-bar-bg: #181a1b;
     --input-border-color: #303030;
     --input-bg: #0e0f0f;
@@ -8,19 +12,32 @@
     --title-color: #e8e6e3;
     --channel-color: #a5a096;
     --video-hover-bg: #484848;
+
+    --container-border-width: 3px;
+    --menu-padding: 10px;
+    --menu-height: 35px;
+    --scroll-bar-thickness: 8px;
+    --menu-padding: 10px;
+
+    --usable-width: calc(var(--max-width) - 2 * var(--container-border-width));
+    --usable-height: calc(var(--max-height) - 2 * var(--menu-padding) - 2 * var(--container-border-width));
 }
 
 html, body {
     background-color: var(--bg);
-    width: 500px;
-    max-height: 500px;
+    width: var(--usable-width);
     margin: 0px;
 }
 
 .error {
-    width: 500px;
-    padding: 1em;
+    --padding: 1em;
+
+    width: calc(var(--usable-width) - 2 * var(--padding));
+    padding: var(--padding);
     background-color: tomato;
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
 }
 
 ::-webkit-scrollbar-track {
@@ -28,7 +45,7 @@ html, body {
 }
 
 ::-webkit-scrollbar {
-    width: 8px;
+    width: var(--scroll-bar-thickness);
     background-color: var(--scroll-bar-track);
 }
 
@@ -39,15 +56,15 @@ html, body {
 
 #menu {
     background-color: var(--top-bar-bg);
-    padding: 10px;
-    height: 35px;
-    top: 3px;
-    right: 3px;
-    width: calc(100% - 20px);
+    padding: var(--menu-padding);
+    height: var(--menu-height);
+    top: var(--container-border-width);
+    right: var(--container-border-width);
+    width: calc(100% - 2 * var(--menu-padding));
 }
 #query {
     background-color: var(--input-bg);
-    width: calc(100% - 31px);
+    width: calc(100% - (calc(6px + 2 * var(--menu-padding) + 2 * var(--container-border-width))));
     padding: 8.5px 15px;
     color: white;
     border: 1px solid var(--input-border-color);
@@ -57,13 +74,11 @@ html, body {
     margin: 0;
     list-style-type: none;
     padding: 0;
-    margin-left: 5px;
     font-weight: bold;
     font-size: 13px;
 }
 
 .video-list li {
-    padding: 10px;
     overflow-x: hidden;
 }
 .video-list li:not(#loading):hover {
@@ -71,13 +86,18 @@ html, body {
 }
 
 #scrollable {
-    max-height: 455px;
+    max-height: calc(var(--usable-height) - var(--menu-height));
     overflow-y: auto;
 }
 
 .video-link {
+    --padding: 10px;
+
     display: inline-block;
     text-decoration: none;
+    height: 100%;
+    padding: var(--padding);
+    width: calc(100% - 2 * var(--padding));
 }
 
 .channel,
@@ -101,7 +121,7 @@ html, body {
 }
 
 .thumbnail {
-    display: inline-block;
+    display: inline-flex;
     float: left;
 }
 
@@ -110,7 +130,7 @@ html, body {
 }
 
 .container {
-    border: 3px solid #7f7f7f;
+    border: var(--container-border-width) solid #7f7f7f;
 }
 
 .msg {

@@ -120,8 +120,9 @@ async function fillList(token, nextPage)
 }
 
 function showError(message) {
-    document.body.classList.add('error');
-    document.body.innerText = message;
+    document.body.innerHTML = `
+        <div class='error'>${message}</div>
+    `;
     console.error(message);
 }
 
@@ -132,25 +133,33 @@ async function initializeVideoFilter()
     triggerFilterChange();
 }
 
-function populatePopup()
+function getAuthToken()
 {
-    chrome.identity.getAuthToken(
+    return new Promise(
+        (resolve, reject) =>
         {
-            'interactive': true
-        },
-        async token =>
-        {
-            try
-            {
-                await fillList(token);
-                initializeVideoFilter();
-            }
-            catch(e)
-            {
-                showError(e);
-            }
+            chrome.identity.getAuthToken(
+                {
+                    'interactive': true
+                },
+                token => resolve(token)
+            );
         }
     );
+}
+
+async function populatePopup()
+{
+    try
+    {
+        const token = await getAuthToken();
+        await fillList(token);
+        initializeVideoFilter();
+    }
+    catch(e)
+    {
+        showError(e);
+    }
 }
 
 function getSavedSearch()
@@ -190,36 +199,44 @@ function setSavedSearch(searchString)
     );
 }
 
+function getCurrentTabURL()
+{
+    return new Promise(
+        (resolve, reject) =>
+        {
+            chrome.tabs.query(
+                {
+                    'active': true,
+                    'currentWindow': true
+                },
+                tabs => resolve(tabs[0].url)
+            );
+        }
+    );
+}
+
 let PLAYLIST_ID = null;
 let filterInput = null;
 
-function main()
+async function main()
 {
     filterInput = document.querySelector('input');
     if (filterInput)
     {
         filterInput.addEventListener('change', triggerFilterChange);
     }
-    chrome.tabs.query(
-        {
-            'active': true,
-            'currentWindow': true
-        },
-        async tabs =>
-        {
-            const url = tabs[0].url;
-            PLAYLIST_ID = getParameterByName(url);
 
-            if (PLAYLIST_ID == "WL")
-            {
-                showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
-            }
-            else
-            {
-                populatePopup();
-            }
-        }
-    );
+    const url = await getCurrentTabURL();
+    PLAYLIST_ID = getParameterByName(url);
+
+    if (PLAYLIST_ID == "WL")
+    {
+        showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
+    }
+    else
+    {
+        populatePopup();
+    }
 }
 
 window.addEventListener('DOMContentLoaded', main);
