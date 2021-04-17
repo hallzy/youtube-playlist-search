@@ -1,3 +1,5 @@
+[![paypal](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=QMDXUKQXRT75N&currency_code=CAD)
+
 # Youtube Playlist Search
 
 This started as a copy of the "Playlist Search For YouTube" extension, but I am
