@@ -76,7 +76,7 @@ html, body {
 }
 
 .video-link {
-    display: block;
+    display: inline-block;
     text-decoration: none;
 }
 

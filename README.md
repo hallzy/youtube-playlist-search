@@ -20,6 +20,9 @@ cleaning it up and customizing it to my liking.
 - Cleaned up the code significantly
 - Updated and cleaned up CSS
 - The UI resembles the YouTube dark theme now.
+- Clicking on a video opens the video in a new tab
+- Search filter is persistent. The extension will remember the filter you used
+  the last time that you did a search for a particular playlist.
 
 ## Installation
 

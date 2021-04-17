@@ -1,45 +1,9 @@
-function makeLinksClickable()
+function triggerFilterChange()
 {
-    document.querySelectorAll('.video-list a').forEach( el => addClickHandler(el));
+    const searchWords = filterInput.value.split(' ');
+    updateVideoList(searchWords);
+    setSavedSearch(searchWords);
 }
-
-function addClickHandler(el)
-{
-    el.addEventListener(
-        'click',
-        (e) =>
-        {
-            const url = e.currentTarget.href;
-            openVideo(url);
-        }
-    );
-}
-
-function openVideo(url)
-{
-    chrome.tabs.getSelected(
-        null,
-        tab =>
-        {
-            chrome.tabs.update(tab.id, { url });
-        }
-    );
-}
-
-const filterInput = document.querySelectorAll('input');
-filterInput.forEach(
-    el =>
-    {
-        addEventListener(
-            'change',
-            (event) =>
-            {
-                const searchWords = event.target.value.split(' ');
-                updateVideoList(searchWords);
-            }
-        );
-    }
-)
 
 function createElementFromHTML(htmlString) {
     const div = document.createElement('div');
@@ -85,7 +49,7 @@ function addVideoToList(videoName, channelName, videoURL, thumbnailURL)
 
     const html = `
         <li>
-            <a href='${videoURL}' class='video-link'>
+            <a href='${videoURL}' target='_blank' class='video-link'>
                 ${img}
                 <div class='title'>${videoName}</div>
                 ${channel}
@@ -111,7 +75,7 @@ function getParameterByName(url) {
     return searchObj.get('list');
 }
 
-async function fillList(playlistID, token, nextPage)
+async function fillList(token, nextPage)
 {
     let pageToken = "";
 
@@ -119,7 +83,7 @@ async function fillList(playlistID, token, nextPage)
     {
         pageToken = `&pageToken=${nextPage}`;
     }
-    const requestURL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistID}${pageToken}&access_token=${token}`;
+    const requestURL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${PLAYLIST_ID}${pageToken}&access_token=${token}`;
 
     const settings = {
         headers: {
@@ -139,20 +103,19 @@ async function fillList(playlistID, token, nextPage)
             const videoTitle = item.snippet.title;
             const videoID =  item.snippet.resourceId.videoId;
             const channelName = item.snippet.videoOwnerChannelTitle;
-            console.log(item.snippet.thumbnails);
 
             const thumbnails = item.snippet.thumbnails;
 
             const thumbnail = thumbnails.medium ?? thumbnails.high ?? thumbnails.standard ?? thumbnails.maxres ?? thumbnails.default ?? {};
             const thumbnailURL = thumbnail?.url;
 
-            const videoURL = `https://www.youtube.com/watch?v=${videoID}&list=${playlistID}`;
+            const videoURL = `https://www.youtube.com/watch?v=${videoID}&list=${PLAYLIST_ID}`;
             addVideoToList(videoTitle, channelName, videoURL, thumbnailURL)
         }
     );
 
     if (typeof json.nextPageToken !== "undefined"){
-        fillList(playlistID, token, json.nextPageToken);
+        await fillList(token, json.nextPageToken);
     }
 }
 
@@ -162,7 +125,14 @@ function showError(message) {
     console.error(message);
 }
 
-function populatePopup(playlistID)
+async function initializeVideoFilter()
+{
+    const savedSearch = await getSavedSearch();
+    filterInput.value = savedSearch;
+    triggerFilterChange();
+}
+
+function populatePopup()
 {
     chrome.identity.getAuthToken(
         {
@@ -172,8 +142,8 @@ function populatePopup(playlistID)
         {
             try
             {
-                await fillList(playlistID, token);
-                makeLinksClickable()
+                await fillList(token);
+                initializeVideoFilter();
             }
             catch(e)
             {
@@ -183,23 +153,73 @@ function populatePopup(playlistID)
     );
 }
 
-chrome.tabs.query(
-    {
-        'active': true,
-        'currentWindow': true
-    },
-    tabs =>
-    {
-        const url = tabs[0].url;
-        const playlistID = getParameterByName(url);
+function getSavedSearch()
+{
+    return new Promise(
+        (resolve, reject) =>
+        {
+            chrome.storage.sync.get(
+                PLAYLIST_ID,
+                (result) =>
+                {
+                    if (chrome.runtime.lastError)
+                    {
+                        console.error(chrome.runtime.lastError);
+                        return reject(chrome.runtime.lastError);
+                    }
+                    resolve(result[PLAYLIST_ID]);
+                }
+            );
+        }
+    );
+}
 
-        if (playlistID == "WL")
+function setSavedSearch(searchString)
+{
+    chrome.storage.sync.set(
         {
-            showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
-        }
-        else
+            [PLAYLIST_ID]: searchString,
+        },
+        (result) =>
         {
-            populatePopup(playlistID);
+            if (chrome.runtime.lastError)
+            {
+                console.error(chrome.runtime.lastError);
+            }
         }
+    );
+}
+
+let PLAYLIST_ID = null;
+let filterInput = null;
+
+function main()
+{
+    filterInput = document.querySelector('input');
+    if (filterInput)
+    {
+        filterInput.addEventListener('change', triggerFilterChange);
     }
-);
+    chrome.tabs.query(
+        {
+            'active': true,
+            'currentWindow': true
+        },
+        async tabs =>
+        {
+            const url = tabs[0].url;
+            PLAYLIST_ID = getParameterByName(url);
+
+            if (PLAYLIST_ID == "WL")
+            {
+                showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
+            }
+            else
+            {
+                populatePopup();
+            }
+        }
+    );
+}
+
+window.addEventListener('DOMContentLoaded', main);

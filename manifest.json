@@ -19,6 +19,7 @@
     "128": "/img/icon-128.png"
   },
   "permissions" : [
+    "storage",
     "declarativeContent",
     "tabs",
     "identity",
