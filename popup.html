@@ -5,15 +5,19 @@
         <script src="/js/popup.js" defer></script>
     </head>
     <body>
+        <div class="spinner hidden">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
         <div class="container">
             <div id="menu">
                 <input id="query" class="search" placeholder="Search this playlist">
+                <button title='Results are cached. Click fetch to retrieve the playlist from YouTube.' class='fetch'>Fetch</button>
             </div>
             <div id="scrollable">
                 <ul class="video-list">
-                    <li id='loading'>
-                        <div class='msg'>Loading results...</div>
-                    </li>
                 </ul>
             </div>
         </div>

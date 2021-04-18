@@ -6,6 +6,7 @@
     --top-bar-bg: #181a1b;
     --input-border-color: #303030;
     --input-bg: #0e0f0f;
+    --input-vertical-padding: 8.5px;
     --bg: #121414;
     --scroll-track: #202324;
     --scroll-bar: #575e62;
@@ -21,6 +22,10 @@
 
     --usable-width: calc(var(--max-width) - 2 * var(--container-border-width));
     --usable-height: calc(var(--max-height) - 2 * var(--menu-padding) - 2 * var(--container-border-width));
+    --query-width: calc(100% - (calc(6px + 2 * var(--menu-padding) + 2 * var(--container-border-width))));
+
+    --fetch-btn-width: 55px;
+    --fetch-btn-margin: 5px;
 }
 
 html, body {
@@ -64,10 +69,15 @@ html, body {
 }
 #query {
     background-color: var(--input-bg);
-    width: calc(100% - (calc(6px + 2 * var(--menu-padding) + 2 * var(--container-border-width))));
-    padding: 8.5px 15px;
+    width: var(--query-width);
+    padding: var(--input-vertical-padding) 15px;
     color: white;
     border: 1px solid var(--input-border-color);
+}
+
+#query.fetch-btn
+{
+    width: calc(var(--query-width) - var(--fetch-btn-width));
 }
 
 .video-list {
@@ -88,6 +98,19 @@ html, body {
 #scrollable {
     max-height: calc(var(--usable-height) - var(--menu-height));
     overflow-y: auto;
+}
+
+.hidden {
+    display: none;
+}
+
+.spinner:not(.hidden) ~ .container #scrollable {
+    min-height: 200px;
+}
+
+.spinner:not(.hidden) ~ .container {
+    pointer-events: none;
+    opacity: 30%;
 }
 
 .video-link {
@@ -136,4 +159,67 @@ html, body {
 .msg {
     color: white;
     text-align: center;
+}
+
+.fetch
+{
+    padding: var(--input-vertical-padding);
+    background-color: #323232;
+    color: #6f6f6f;
+    border: none;
+    cursor: pointer;
+}
+
+#query:not(.fetch-btn) ~ .fetch
+{
+    display: none;
+}
+
+/* SPINNER */
+.spinner {
+    --spinner-width: 150px;
+
+    position: absolute;
+    width: var(--spinner-width);
+    height: var(--spinner-width);
+    top: 50%;
+    left: 50%;
+    margin-top: calc(-0.5 * var(--spinner-width) + var(--menu-height));
+    margin-left: calc(-0.5 * var(--spinner-width));
+}
+
+.spinner div {
+    --width: calc(0.8 * var(--spinner-width));
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: var(--width);
+    height: var(--width);
+    margin: calc(0.1 * var(--spinner-width));
+    border: calc(0.1 * var(--spinner-width)) solid #fff;
+    border-radius: 50%;
+    animation: spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: #fff transparent transparent transparent;
+}
+
+.spinner div:nth-child(1) {
+    animation-delay: -0.45s;
+}
+
+.spinner div:nth-child(2) {
+    animation-delay: -0.3s;
+}
+
+.spinner div:nth-child(3) {
+    animation-delay: -0.15s;
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }

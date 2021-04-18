@@ -1,73 +1,92 @@
-function triggerFilterChange()
+function getMatchingVideos()
 {
-    const searchWords = filterInput.value.split(' ');
-    updateVideoList(searchWords);
-    setSavedSearch(searchWords);
+    setSavedSearch(filterInput.value);
+
+    const searchWords = filterInput
+        .value
+        .toLowerCase()
+        .split(' ')
+    ;
+
+    return VIDEOS
+        .filter(
+            video =>
+            {
+                const videoName = video.videoTitle.toLowerCase();
+                const channelName = video.channelName.toLowerCase();
+
+                const videoMatches = searchWords.every(word => videoName.indexOf(word) !== -1 || channelName.indexOf(word) !== -1);
+
+                return videoMatches;
+            }
+        )
+    ;
 }
 
-function createElementFromHTML(htmlString) {
-    const div = document.createElement('div');
-    div.innerHTML = htmlString.trim();
+function addVideosToDOM(append = false)
+{
+    if (!append)
+    {
+        nextVideosStartIdx = 0;
+    }
 
-    return div.firstChild;
+    const matchingVideos50 = matchingVideos.slice(nextVideosStartIdx, nextVideosStartIdx + 50);
+    nextVideosStartIdx += 50;
+
+    const html = getVideoHTML(matchingVideos50);
+
+    if (append)
+    {
+        document.querySelector('.video-list').innerHTML += html;
+    }
+    else
+    {
+        document.querySelector('.video-list').innerHTML = html;
+    }
 }
 
-function updateVideoList(searchWords) {
-    const videosInList = document.querySelectorAll('li a');
+function getVideoHTML(videos)
+{
+    let html = '';
 
-    searchWords = searchWords.map(word => word.toLowerCase());
-
-    videosInList.forEach(
-        videoEl =>
+    videos.forEach(
+        videoObj =>
         {
-            const videoName = videoEl.innerText.toLowerCase();;
-            const videoMatches = searchWords.every(word => videoName.indexOf(word) !== -1);
+            const { videoTitle, channelName, videoURL, thumbnailURL } = videoObj;
 
-            videoEl.parentElement.hidden = !videoMatches;
+            let img = '';
+            let channel = '';
+
+            if (thumbnailURL)
+            {
+                img = `
+                    <div class='thumbnail'><img src='${thumbnailURL}'></div>
+                `;
+            }
+
+            if (channelName)
+            {
+                channel = `
+                    <div class='channel'>${channelName}</div>
+                `;
+            }
+
+            html += `
+                <li>
+                    <a href='${videoURL}' target='_blank' class='video-link'>
+                        ${img}
+                        <div class='title'>${videoTitle}</div>
+                        ${channel}
+                    </a>
+                </li>
+            `;
         }
     );
+
+    return html;
 }
 
-function addVideoToList(videoName, channelName, videoURL, thumbnailURL)
-{
-    let img = '';
-    let channel = '';
-
-    if (thumbnailURL)
-    {
-        img = `
-            <div class='thumbnail'><img src='${thumbnailURL}'></div>
-        `;
-    }
-
-    if (channelName)
-    {
-        channel = `
-            <div class='channel'>${channelName}</div>
-        `;
-    }
-
-    const html = `
-        <li>
-            <a href='${videoURL}' target='_blank' class='video-link'>
-                ${img}
-                <div class='title'>${videoName}</div>
-                ${channel}
-            </a>
-        </li>
-    `;
-
-    const anchor = createElementFromHTML(html);
-    document.querySelector('.video-list').appendChild(anchor);
-
-    const loading = document.querySelector('#loading')
-    if (loading)
-    {
-        loading.remove();
-    }
-}
-
-function getParameterByName(url) {
+function getPlaylistID(url) {
     const urlObj = new URL(url);
     const search = urlObj.search;
     const searchObj = new URLSearchParams(search);
@@ -102,7 +121,7 @@ async function fillList(token, nextPage)
         {
             const videoTitle = item.snippet.title;
             const videoID =  item.snippet.resourceId.videoId;
-            const channelName = item.snippet.videoOwnerChannelTitle;
+            const channelName = item.snippet.videoOwnerChannelTitle ?? "";
 
             const thumbnails = item.snippet.thumbnails;
 
@@ -110,7 +129,15 @@ async function fillList(token, nextPage)
             const thumbnailURL = thumbnail?.url;
 
             const videoURL = `https://www.youtube.com/watch?v=${videoID}&list=${PLAYLIST_ID}`;
-            addVideoToList(videoTitle, channelName, videoURL, thumbnailURL)
+
+            VIDEOS.push(
+                {
+                    videoTitle,
+                    channelName,
+                    videoURL,
+                    thumbnailURL,
+                }
+            );
         }
     );
 
@@ -124,13 +151,6 @@ function showError(message) {
         <div class='error'>${message}</div>
     `;
     console.error(message);
-}
-
-async function initializeVideoFilter()
-{
-    const savedSearch = await getSavedSearch();
-    filterInput.value = savedSearch;
-    triggerFilterChange();
 }
 
 function getAuthToken()
@@ -148,18 +168,57 @@ function getAuthToken()
     );
 }
 
+function showSpinner()
+{
+    const spinner = document.querySelector('.spinner');
+    spinner.classList.remove('hidden');
+}
+
+function hideSpinner()
+{
+    const spinner = document.querySelector('.spinner');
+    spinner.classList.add('hidden');
+}
+
 async function populatePopup()
 {
     try
     {
-        const token = await getAuthToken();
-        await fillList(token);
-        initializeVideoFilter();
+        const savedVideos = await getSavedVideos();
+        if (savedVideos)
+        {
+            document.querySelector('#query').classList.add('fetch-btn');
+            VIDEOS = savedVideos;
+        }
+        else
+        {
+            const token = await getAuthToken();
+            const duration = await timeFunction(() => fillList(token));
+
+            const oneSecond = 1000;
+
+            if (duration > oneSecond)
+            {
+                saveVideos();
+            }
+        }
+
+        matchingVideos = getMatchingVideos();
+        addVideosToDOM();
     }
     catch(e)
     {
         showError(e);
     }
+}
+
+async function timeFunction(func)
+{
+    const start = new Date();
+    await func();
+    const end = new Date();
+
+    return end - start;
 }
 
 function getSavedSearch()
@@ -194,6 +253,70 @@ function setSavedSearch(searchString)
             if (chrome.runtime.lastError)
             {
                 console.error(chrome.runtime.lastError);
+                alert(chrome.runtime.lastError);
+            }
+        }
+    );
+}
+
+function getSavedVideos()
+{
+    return new Promise(
+        (resolve, reject) =>
+        {
+            chrome.storage.local.get(
+                `VIDEOS_${PLAYLIST_ID}`,
+                (result) =>
+                {
+                    if (chrome.runtime.lastError)
+                    {
+                        console.error(chrome.runtime.lastError);
+                        return reject(chrome.runtime.lastError);
+                    }
+                    resolve(result[`VIDEOS_${PLAYLIST_ID}`]);
+                }
+            );
+        }
+    );
+}
+
+function removeSavedVideos()
+{
+    VIDEOS = [];
+    return new Promise(
+        (resolve, reject) =>
+        {
+            chrome.storage.local.remove(
+                `VIDEOS_${PLAYLIST_ID}`,
+                (result) =>
+                {
+                    if (chrome.runtime.lastError)
+                    {
+                        console.error(chrome.runtime.lastError);
+                        return reject(chrome.runtime.lastError);
+                    }
+                    resolve();
+                }
+            );
+        }
+    );
+}
+
+function saveVideos()
+{
+    // NOTE, there is an unlimited storage permission that I can use if needed.
+    // Currently local storage quota is 5MB. My biggest playlist is about 5kB,
+    // so there is a lot of wiggle room still.
+    chrome.storage.local.set(
+        {
+            [`VIDEOS_${PLAYLIST_ID}`]: VIDEOS,
+        },
+        (result) =>
+        {
+            if (chrome.runtime.lastError)
+            {
+                console.error(chrome.runtime.lastError);
+                alert(chrome.runtime.lastError);
             }
         }
     );
@@ -215,28 +338,113 @@ function getCurrentTabURL()
     );
 }
 
+function scrollToTop()
+{
+    scrollable.scrollTop = 0;
+}
+
+async function setupFilterChangeEvent()
+{
+    if (!filterInput)
+    {
+        return;
+    }
+
+    filterInput.value = await getSavedSearch();
+    filterInput.addEventListener(
+
+        'change',
+        () => spinnerWrapper(
+            () => {
+                scrollToTop();
+                matchingVideos = getMatchingVideos();
+                addVideosToDOM();
+            }
+        )
+    );
+}
+
+function setupFetchClickEvent()
+{
+    const fetchBtn = document.querySelector('.fetch');
+    if (!fetchBtn)
+    {
+        return;
+    }
+
+    fetchBtn.addEventListener(
+        'click',
+        async () =>
+        {
+
+            await removeSavedVideos();
+            spinnerWrapper(populatePopup);
+        }
+    );
+}
+
+function setupScrollEvent()
+{
+    if (!scrollable)
+    {
+        return;
+    }
+
+    let lastScrollHeight = 0;
+    scrollable.addEventListener(
+        'scroll',
+        e =>
+        {
+            const scrollHeight = scrollable.scrollHeight;
+            const scrollDistance = scrollable.scrollTop;
+
+            const newScrollHeight = scrollHeight !== lastScrollHeight;
+
+            const percentScrolled = scrollDistance / scrollHeight;
+
+            if (newScrollHeight && percentScrolled > 0.80)
+            {
+                lastScrollHeight = scrollHeight;
+                addVideosToDOM(true);
+            }
+        }
+    );
+}
+
+async function spinnerWrapper(func)
+{
+    showSpinner();
+    await func();
+    hideSpinner();
+}
+
 let PLAYLIST_ID = null;
+let VIDEOS = [];
+let nextVideosStartIdx = 0;
+let matchingVideos = [];
+
+let scrollable = null;
 let filterInput = null;
 
 async function main()
 {
-    filterInput = document.querySelector('input');
-    if (filterInput)
-    {
-        filterInput.addEventListener('change', triggerFilterChange);
-    }
-
     const url = await getCurrentTabURL();
-    PLAYLIST_ID = getParameterByName(url);
+    PLAYLIST_ID = getPlaylistID(url);
 
     if (PLAYLIST_ID == "WL")
     {
         showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
+        return;
     }
-    else
-    {
-        populatePopup();
-    }
+
+    filterInput = document.querySelector('input');
+    scrollable = document.querySelector('#scrollable');
+
+    setupFilterChangeEvent();
+    setupFetchClickEvent();
+    setupScrollEvent();
+
+    spinnerWrapper(populatePopup);
 }
 
 window.addEventListener('DOMContentLoaded', main);

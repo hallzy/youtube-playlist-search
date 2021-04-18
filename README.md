@@ -23,6 +23,10 @@ cleaning it up and customizing it to my liking.
 - Clicking on a video opens the video in a new tab
 - Search filter is persistent. The extension will remember the filter you used
   the last time that you did a search for a particular playlist.
+- Loading spinner
+- Lazy Loading
+- Local storage of videos for large playlists for fast retrieval
+  - Fetch button to force fetch the playlist from the API
 
 ## Installation
 
@@ -45,7 +49,3 @@ You should have the extension now.
 
 Optionally, you can now disable "Developer mode". Chrome should keep the custom
 version even after disabling.
-
-## TODO
-
-* Add a spinner, and display it whenever something is loading
