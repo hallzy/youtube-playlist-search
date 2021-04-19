@@ -235,7 +235,7 @@ function getSavedSearch()
                         console.error(chrome.runtime.lastError);
                         return reject(chrome.runtime.lastError);
                     }
-                    resolve(result[PLAYLIST_ID]);
+                    resolve(result[PLAYLIST_ID] ?? '');
                 }
             );
         }
