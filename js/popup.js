@@ -1,5 +1,185 @@
+class LazyLoader {
+    constructor(videoListElement, scrollableEl, videosPerLoad) {
+        this.videoList = videoListElement;
+        this.videosPerLoad = videosPerLoad;
+        this.videos = [];
+        this.nextStartIdx = 0;
+
+        this.startLazyScroll(scrollableEl);
+    }
+
+    startLazyScroll(scrollable) {
+        let lastScrollHeight = 0;
+
+        scrollable.addEventListener('scroll', e => {
+            const scrollHeight = scrollable.scrollHeight;
+            const scrollDistance = scrollable.scrollTop;
+
+            const newScrollHeight = scrollHeight !== lastScrollHeight;
+
+            const percentScrolled = scrollDistance / scrollHeight;
+
+            const triggerUpdate = newScrollHeight && percentScrolled > 0.80;
+            if (triggerUpdate) {
+                lastScrollHeight = scrollHeight;
+                this.updateDOM();
+            }
+        });
+    }
+
+    reset() {
+        this.nextStartIdx = 0;
+        this.videoList.innerHTML = '';
+    }
+
+    getNextVideos() {
+        const startIdx = this.nextStartIdx;
+        this.nextStartIdx += this.videosPerLoad;
+        const endIdx = this.nextStartIdx;
+
+        return this.videos.slice(startIdx, endIdx);
+    }
+
+    getVideoHTML() {
+        let html = '';
+
+        const videos = this.getNextVideos();
+        videos.forEach(videoObj => {
+            const { videoTitle, channelName, videoURL, thumbnailURL } = videoObj;
+
+            let img = '';
+            let channel = '';
+
+            if (thumbnailURL) {
+                img = `
+                    <div class='thumbnail'><img src='${thumbnailURL}'></div>
+                `;
+            }
+
+            if (channelName) {
+                channel = `
+                    <div class='channel'>${channelName}</div>
+                `;
+            }
+
+            html += `
+                <li>
+                    <a href='${videoURL}' target='_blank' class='video-link'>
+                        ${img}
+                        <div class='title'>${videoTitle}</div>
+                        ${channel}
+                    </a>
+                </li>
+            `;
+        });
+
+        return html;
+    }
+
+    updateDOM(videos) {
+        if (videos) {
+            this.reset();
+            this.videos = videos;
+        }
+        this.videoList.innerHTML += this.getVideoHTML();
+    }
+}
+
+class Spinner {
+    constructor(spinnerEl) {
+        this.el = spinnerEl;
+    }
+
+    async wrapAround(func) {
+        this.show();
+        await func();
+        this.hide();
+    }
+
+    show() {
+        this.el.classList.remove('hidden');
+    }
+
+    hide() {
+        this.el.classList.add('hidden');
+    }
+}
+
+class Storage {
+    constructor() {
+
+    }
+
+    get filter() {
+        return new Promise((resolve, reject) => {
+            chrome.storage.sync.get(PLAYLIST_ID, (result) => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError);
+                    return reject(chrome.runtime.lastError);
+                }
+                resolve(result[PLAYLIST_ID] ?? '');
+            });
+        });
+    }
+
+    set filter(searchString) {
+        chrome.storage.sync.set(
+            {
+                [PLAYLIST_ID]: searchString,
+            },
+            (result) => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError);
+                    alert(chrome.runtime.lastError);
+                }
+            }
+        );
+    }
+
+    get videos() {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get(`VIDEOS_${PLAYLIST_ID}`, (result) => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError);
+                    return reject(chrome.runtime.lastError);
+                }
+                resolve(result[`VIDEOS_${PLAYLIST_ID}`]);
+            });
+        });
+    }
+
+    set videos(videos) {
+        // NOTE, there is an unlimited storage permission that I can use if needed.
+        // Currently local storage quota is 5MB. My biggest playlist is about 5kB,
+        // so there is a lot of wiggle room still.
+        chrome.storage.local.set(
+            {
+                [`VIDEOS_${PLAYLIST_ID}`]: videos,
+            },
+            (result) => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError);
+                    alert(chrome.runtime.lastError);
+                }
+            }
+        );
+    }
+
+    resetVideos() {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.remove(`VIDEOS_${PLAYLIST_ID}`, (result) => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError);
+                    return reject(chrome.runtime.lastError);
+                }
+                resolve();
+            });
+        });
+    }
+}
+
 function getMatchingVideos() {
-    setSavedSearch(filterInput.value);
+    storage.filter = filterInput.value;
 
     const searchWords = filterInput
         .value
@@ -15,59 +195,6 @@ function getMatchingVideos() {
 
         return videoMatches;
     });
-}
-
-function addVideosToDOM(append = false)
-{
-    if (!append) {
-        nextVideosStartIdx = 0;
-    }
-
-    const matchingVideos50 = matchingVideos.slice(nextVideosStartIdx, nextVideosStartIdx + 50);
-    nextVideosStartIdx += 50;
-
-    const html = getVideoHTML(matchingVideos50);
-
-    if (append) {
-        document.querySelector('.video-list').innerHTML += html;
-    } else {
-        document.querySelector('.video-list').innerHTML = html;
-    }
-}
-
-function getVideoHTML(videos) {
-    let html = '';
-
-    videos.forEach(videoObj => {
-        const { videoTitle, channelName, videoURL, thumbnailURL } = videoObj;
-
-        let img = '';
-        let channel = '';
-
-        if (thumbnailURL) {
-            img = `
-                <div class='thumbnail'><img src='${thumbnailURL}'></div>
-            `;
-        }
-
-        if (channelName) {
-            channel = `
-                <div class='channel'>${channelName}</div>
-            `;
-        }
-
-        html += `
-            <li>
-                <a href='${videoURL}' target='_blank' class='video-link'>
-                    ${img}
-                    <div class='title'>${videoTitle}</div>
-                    ${channel}
-                </a>
-            </li>
-        `;
-    });
-
-    return html;
 }
 
 function getPlaylistID(url) {
@@ -118,7 +245,8 @@ async function fillList(token, nextPage) {
         });
     });
 
-    if (typeof json.nextPageToken !== "undefined") {
+    const thereIsNextPage = typeof json.nextPageToken !== "undefined";
+    if (thereIsNextPage) {
         await fillList(token, json.nextPageToken);
     }
 }
@@ -136,19 +264,9 @@ function getAuthToken() {
     });
 }
 
-function showSpinner() {
-    const spinner = document.querySelector('.spinner');
-    spinner.classList.remove('hidden');
-}
-
-function hideSpinner() {
-    const spinner = document.querySelector('.spinner');
-    spinner.classList.add('hidden');
-}
-
 async function populatePopup() {
     try {
-        const savedVideos = await getSavedVideos();
+        const savedVideos = await storage.videos;
         if (savedVideos) {
             document.querySelector('#query').classList.add('fetch-btn');
             VIDEOS = savedVideos;
@@ -157,14 +275,14 @@ async function populatePopup() {
             const duration = await timeFunction(() => fillList(token));
 
             const oneSecond = 1000;
+            const fetchTookTooLong = duration > oneSecond;
 
-            if (duration > oneSecond) {
-                saveVideos();
+            if (fetchTookTooLong) {
+                storage.videos = VIDEOS;
             }
         }
 
-        matchingVideos = getMatchingVideos();
-        addVideosToDOM();
+        lazyLoader.updateDOM(getMatchingVideos());
     } catch(e) {
         showError(e);
     }
@@ -176,74 +294,6 @@ async function timeFunction(func) {
     const end = new Date();
 
     return end - start;
-}
-
-function getSavedSearch() {
-    return new Promise((resolve, reject) => {
-        chrome.storage.sync.get(PLAYLIST_ID, (result) => {
-            if (chrome.runtime.lastError) {
-                console.error(chrome.runtime.lastError);
-                return reject(chrome.runtime.lastError);
-            }
-            resolve(result[PLAYLIST_ID] ?? '');
-        });
-    });
-}
-
-function setSavedSearch(searchString) {
-    chrome.storage.sync.set(
-        {
-            [PLAYLIST_ID]: searchString,
-        },
-        (result) => {
-            if (chrome.runtime.lastError) {
-                console.error(chrome.runtime.lastError);
-                alert(chrome.runtime.lastError);
-            }
-        }
-    );
-}
-
-function getSavedVideos() {
-    return new Promise((resolve, reject) => {
-        chrome.storage.local.get(`VIDEOS_${PLAYLIST_ID}`, (result) => {
-            if (chrome.runtime.lastError) {
-                console.error(chrome.runtime.lastError);
-                return reject(chrome.runtime.lastError);
-            }
-            resolve(result[`VIDEOS_${PLAYLIST_ID}`]);
-        });
-    });
-}
-
-function removeSavedVideos() {
-    VIDEOS = [];
-    return new Promise((resolve, reject) => {
-        chrome.storage.local.remove(`VIDEOS_${PLAYLIST_ID}`, (result) => {
-            if (chrome.runtime.lastError) {
-                console.error(chrome.runtime.lastError);
-                return reject(chrome.runtime.lastError);
-            }
-            resolve();
-        });
-    });
-}
-
-function saveVideos() {
-    // NOTE, there is an unlimited storage permission that I can use if needed.
-    // Currently local storage quota is 5MB. My biggest playlist is about 5kB,
-    // so there is a lot of wiggle room still.
-    chrome.storage.local.set(
-        {
-            [`VIDEOS_${PLAYLIST_ID}`]: VIDEOS,
-        },
-        (result) => {
-            if (chrome.runtime.lastError) {
-                console.error(chrome.runtime.lastError);
-                alert(chrome.runtime.lastError);
-            }
-        }
-    );
 }
 
 function getCurrentTabURL() {
@@ -267,12 +317,11 @@ async function setupFilterChangeEvent() {
         return;
     }
 
-    filterInput.value = await getSavedSearch();
+    filterInput.value = await storage.filter;
     filterInput.addEventListener('change', () => {
-        return spinnerWrapper(() => {
+        spinner.wrapAround(() => {
             scrollToTop();
-            matchingVideos = getMatchingVideos();
-            addVideosToDOM();
+            lazyLoader.updateDOM(getMatchingVideos());
         })
     });
 }
@@ -284,36 +333,17 @@ function setupFetchClickEvent() {
     }
 
     fetchBtn.addEventListener('click', async () => {
-        await removeSavedVideos();
-        spinnerWrapper(populatePopup);
+        VIDEOS = [];
+        await storage.resetVideos();
+        spinner.wrapAround(populatePopup);
     });
 }
 
-function setupScrollEvent() {
-    if (!scrollable) {
-        return;
-    }
-
-    let lastScrollHeight = 0;
-    scrollable.addEventListener('scroll', e => {
-        const scrollHeight = scrollable.scrollHeight;
-        const scrollDistance = scrollable.scrollTop;
-
-        const newScrollHeight = scrollHeight !== lastScrollHeight;
-
-        const percentScrolled = scrollDistance / scrollHeight;
-
-        if (newScrollHeight && percentScrolled > 0.80) {
-            lastScrollHeight = scrollHeight;
-            addVideosToDOM(true);
-        }
-    });
-}
-
-async function spinnerWrapper(func) {
-    showSpinner();
-    await func();
-    hideSpinner();
+function isBackgroundScript() {
+    // If container doesn't exist, then this is the background script, so just
+    // ignore everything.
+    const container = document.querySelector('.container');
+    return !container;
 }
 
 let PLAYLIST_ID = null;
@@ -324,7 +354,15 @@ let matchingVideos = [];
 let scrollable = null;
 let filterInput = null;
 
+let lazyLoader = null;
+let spinner = null;
+let storage = null;
+
 async function main() {
+    if (isBackgroundScript()) {
+        return;
+    }
+
     const url = await getCurrentTabURL();
     PLAYLIST_ID = getPlaylistID(url);
 
@@ -336,11 +374,17 @@ async function main() {
     filterInput = document.querySelector('input');
     scrollable = document.querySelector('#scrollable');
 
+    const videoList = document.querySelector('.video-list');
+    const spinnerEl = document.querySelector('.spinner');
+
+    spinner = new Spinner(spinnerEl);
+    storage = new Storage();
+    lazyLoader = new LazyLoader(videoList, scrollable, 50);
+
     setupFilterChangeEvent();
     setupFetchClickEvent();
-    setupScrollEvent();
 
-    spinnerWrapper(populatePopup);
+    spinner.wrapAround(populatePopup);
 }
 
 window.addEventListener('DOMContentLoaded', main);
