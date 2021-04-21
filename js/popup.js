@@ -187,7 +187,7 @@ function getMatchingVideos() {
         .split(' ')
     ;
 
-    return VIDEOS.filter(video => {
+    matchingVideos = VIDEOS.filter(video => {
         const videoName = video.videoTitle.toLowerCase();
         const channelName = video.channelName.toLowerCase();
 
@@ -195,6 +195,8 @@ function getMatchingVideos() {
 
         return videoMatches;
     });
+
+    return matchingVideos;
 }
 
 function getPlaylistID(url) {
@@ -283,9 +285,19 @@ async function populatePopup() {
         }
 
         lazyLoader.updateDOM(getMatchingVideos());
+        updateMatchCount();
     } catch(e) {
         showError(e);
     }
+}
+
+function updateMatchCount() {
+    const matchCountEl = document.querySelector('.match-count');
+
+    const videosCount = VIDEOS.length;
+    const matchingCount = matchingVideos.length;
+
+    matchCountEl.innerText = `${matchingCount} / ${videosCount} matches`;
 }
 
 async function timeFunction(func) {
@@ -322,6 +334,7 @@ async function setupFilterChangeEvent() {
         spinner.wrapAround(() => {
             scrollToTop();
             lazyLoader.updateDOM(getMatchingVideos());
+            updateMatchCount();
         })
     });
 }
