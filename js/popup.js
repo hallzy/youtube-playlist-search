@@ -1,6 +1,5 @@
 class LazyLoader {
-    constructor(videoListElement, scrollableEl, videosPerLoad) {
-        this.videoList = videoListElement;
+    constructor(scrollableEl, videosPerLoad) {
         this.videosPerLoad = videosPerLoad;
         this.videos = [];
         this.nextStartIdx = 0;
@@ -29,7 +28,7 @@ class LazyLoader {
 
     reset() {
         this.nextStartIdx = 0;
-        this.videoList.innerHTML = '';
+        videoList.innerHTML = '';
     }
 
     getNextVideos() {
@@ -81,7 +80,8 @@ class LazyLoader {
             this.reset();
             this.videos = videos;
         }
-        this.videoList.innerHTML += this.getVideoHTML();
+        videoList.innerHTML += this.getVideoHTML();
+        updateMatchCount();
     }
 }
 
@@ -284,11 +284,24 @@ async function populatePopup() {
             }
         }
 
+        updateVideosByChannelDOM();
+
         lazyLoader.updateDOM(getMatchingVideos());
-        updateMatchCount();
     } catch(e) {
         showError(e);
     }
+}
+
+function updateVideosByChannelDOM() {
+    const videosByChannel = getVideosByChannel();
+
+    let html = '';
+    videosByChannel.forEach(video => {
+        html += `
+            <li data-channel='${video.channel}'>${video.channel} (${video.count})</li>
+        `;
+    });
+    channelList.innerHTML = html;
 }
 
 function updateMatchCount() {
@@ -334,9 +347,33 @@ async function setupFilterChangeEvent() {
         spinner.wrapAround(() => {
             scrollToTop();
             lazyLoader.updateDOM(getMatchingVideos());
-            updateMatchCount();
         })
     });
+}
+
+function getVideosByChannel() {
+    let hash = {};
+
+    VIDEOS.forEach(video => {
+        const channel = video.channelName;
+
+        if (channel === '') {
+            return;
+        }
+
+        if (!hash[channel]) {
+            hash[channel] = 0;
+        }
+        hash[channel]++;
+    });
+
+    let sorted = Object
+        .entries(hash)
+        .sort(([,a], [,b]) => b - a)
+        .map(([channel, count]) => ({ channel, count }))
+    ;
+
+    return sorted;
 }
 
 function setupFetchClickEvent() {
@@ -349,6 +386,47 @@ function setupFetchClickEvent() {
         VIDEOS = [];
         await storage.resetVideos();
         spinner.wrapAround(populatePopup);
+    });
+}
+
+function setupChannelSelect() {
+    channelList.addEventListener('click', e => {
+        const clickedEl = e.target;
+        if (clickedEl.nodeName !== 'LI') {
+            return;
+        }
+
+        const channel = clickedEl.dataset.channel;
+        filterInput.value = channel;
+        lazyLoader.updateDOM(getMatchingVideos());
+        scrollToTop();
+        viewChangeBtn.click();
+    });
+}
+
+function setupViewSwitcher() {
+    let view = 'Playlist';
+    viewChangeBtn.addEventListener('click', e => {
+        btnText = view;
+        switch(view) {
+            case 'Playlist':
+                view = 'By Channel';
+                break;
+            case 'By Channel':
+                view = 'Playlist';
+                break;
+            default:
+                view = 'Playlist';
+                break;
+        }
+
+        const showVideoList = view === 'Playlist';
+        const showChannelList = view === 'By Channel';
+
+        videoList.hidden = !showVideoList;
+        channelList.hidden = !showChannelList;
+
+        viewChangeBtn.innerText = btnText;
     });
 }
 
@@ -366,6 +444,10 @@ let matchingVideos = [];
 
 let scrollable = null;
 let filterInput = null;
+let channelList = null;
+let videoList = null;
+
+let viewChangeBtn = null;
 
 let lazyLoader = null;
 let spinner = null;
@@ -386,16 +468,20 @@ async function main() {
 
     filterInput = document.querySelector('input');
     scrollable = document.querySelector('#scrollable');
+    channelList = document.querySelector('.channel-list');
+    videoList = document.querySelector('.video-list');
+    viewChangeBtn = document.querySelector('.view-change-btn');
 
-    const videoList = document.querySelector('.video-list');
     const spinnerEl = document.querySelector('.spinner');
 
     spinner = new Spinner(spinnerEl);
     storage = new Storage();
-    lazyLoader = new LazyLoader(videoList, scrollable, 50);
+    lazyLoader = new LazyLoader(scrollable, 50);
 
     setupFilterChangeEvent();
     setupFetchClickEvent();
+    setupChannelSelect();
+    setupViewSwitcher();
 
     spinner.wrapAround(populatePopup);
 }

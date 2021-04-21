@@ -26,12 +26,15 @@
 
     --fetch-btn-width: 55px;
     --fetch-btn-margin: 5px;
+
+    --view-change-btn-width: 86px;
 }
 
 html, body {
     background-color: var(--primary-100);
     width: var(--usable-width);
     margin: 0px;
+    color: var(--primary-550);
 }
 
 .error {
@@ -69,7 +72,7 @@ html, body {
 }
 #query {
     background-color: var(--primary-100);
-    width: var(--query-width);
+    width: calc(var(--query-width) - var(--view-change-btn-width) - 4px);
     padding: var(--input-vertical-padding) 15px;
     color: var(--primary-550);
     border: 1px solid var(--primary-200);
@@ -81,7 +84,11 @@ html, body {
 
 #query.fetch-btn
 {
-    width: calc(var(--query-width) - var(--fetch-btn-width));
+    width: calc(var(--query-width) - var(--fetch-btn-width) - var(--view-change-btn-width) - 3px);
+}
+
+.view-change-btn {
+    width: var(--view-change-btn-width);
 }
 
 .video-list {
@@ -97,6 +104,16 @@ html, body {
 }
 .video-list li:not(#loading):hover {
     background-color: var(--primary-200);
+}
+
+.channel-list {
+    list-style-type: none;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+.channel-list li {
+    overflow-x: hidden;
 }
 
 #scrollable {
@@ -165,8 +182,7 @@ html, body {
     text-align: center;
 }
 
-.fetch
-{
+button {
     padding: var(--input-vertical-padding);
     background-color: var(--primary-200);
     color: var(--primary-350);
