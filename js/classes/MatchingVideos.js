@@ -1,5 +1,7 @@
 import filterInput from '../elements/filterInput.js';
 
+import tokenizeFilter from '../functions/tokenizeFilter.js';
+
 import storage from '../objects/storage.js';
 
 export default class MatchingVideos {
@@ -10,11 +12,7 @@ export default class MatchingVideos {
     update() {
         storage.filter = filterInput.value;
 
-        const searchWords = filterInput
-            .value
-            .toLowerCase()
-            .split(' ')
-        ;
+        const searchWords = tokenizeFilter(filterInput.value.toLowerCase());
 
         this.videos = videos.filter(video => {
             const videoName = video.videoTitle.toLowerCase();

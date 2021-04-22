@@ -16,8 +16,7 @@ channelList.addEventListener('click', e => {
     }
 
     const channel = clickedEl.dataset.channel;
-    filterInput.value = channel;
+    filterInput.value = `"${channel}"`;
     lazyLoad(matchingVideos.update());
-    scrollToTop();
     viewChangeBtn.click();
 });

@@ -1,5 +1,7 @@
-import videoList from './videoList.js';
 import channelList from './channelList.js';
+import videoList from './videoList.js';
+
+import scrollToTop from '../functions/scrollToTop.js';
 
 const viewChangeBtn = document.querySelector('.view-change-btn');
 export default viewChangeBtn;
@@ -24,6 +26,8 @@ viewChangeBtn.addEventListener('click', e => {
 
     videoList.hidden = !showVideoList;
     channelList.hidden = !showChannelList;
+
+    scrollToTop();
 
     viewChangeBtn.innerText = btnText;
 });
