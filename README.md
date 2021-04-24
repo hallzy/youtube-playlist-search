@@ -11,8 +11,8 @@ cleaning it up and customizing it to my liking.
 
 - Searching is now more 'fuzzy', so it searches words individually instead of
   together.
-  Searches contain the name of the channel that the video is from, and the
-  channel name is also searchable
+- Search by video title
+- Searchable channel dropdown
 - Videos in the list have a thumbnail
 - Removed list.js and jQuery dependencies (jQuery was literally being used for
   list.js and one other thing, and list.js honestly just complicated the script
