@@ -1,4 +1,5 @@
-import filterInput from '../elements/filterInput.js';
+import titleFilter from '../elements/titleFilter.js';
+import channelFilter from '../elements/channelFilter.js';
 
 import tokenizeFilter from '../functions/tokenizeFilter.js';
 
@@ -10,17 +11,24 @@ export default class MatchingVideos {
     }
 
     update() {
-        storage.filter = filterInput.value;
+        storage.titleFilter = titleFilter.value;
+        storage.channelFilter = channelFilter.value;
 
-        const searchWords = tokenizeFilter(filterInput.value.toLowerCase());
+        const titleWords = tokenizeFilter(titleFilter.value.toLowerCase());
+        const channelWord = channelFilter.value.toLowerCase();
 
         this.videos = videos.filter(video => {
             const videoName = video.videoTitle.toLowerCase();
             const channelName = video.channelName.toLowerCase();
 
-            const videoMatches = searchWords.every(word => videoName.indexOf(word) !== -1 || channelName.indexOf(word) !== -1);
+            const channelMatches = channelWord.length === 0 || channelWord === channelName;
+            if (!channelMatches) {
+                return false;
+            }
 
-            return videoMatches;
+            const titleMatches = titleWords.every(word => videoName.indexOf(word) !== -1);
+
+            return titleMatches;
         });
 
         return this.videos;

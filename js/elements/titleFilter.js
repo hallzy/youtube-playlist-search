@@ -5,11 +5,11 @@ import spinner from '../objects/spinner.js';
 import storage from '../objects/storage.js';
 import matchingVideos from '../objects/matchingVideos.js';
 
-const filterInput = document.querySelector('input');
-export default filterInput;
+const titleFilter = document.querySelector('.title-filter');
+export default titleFilter;
 
-filterInput.value = await storage.filter;
-filterInput.addEventListener('change', () => {
+titleFilter.value = await storage.titleFilter;
+titleFilter.addEventListener('change', () => {
     spinner.wrapAround(() => {
         scrollToTop();
         lazyLoad(matchingVideos.update());

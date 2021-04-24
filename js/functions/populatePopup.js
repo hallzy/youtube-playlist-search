@@ -5,13 +5,11 @@ import lazyLoad from '../functions/lazyLoad.js';
 
 import playlistID from '../data/playlistID.js';
 
-import channelList from '../elements/channelList.js';
-
 export default async function populatePopup() {
     const savedVideos = await storage.videos;
 
     if (savedVideos) {
-        document.querySelector('#query').classList.add('fetch-btn');
+        document.querySelector('#menu').classList.add('fetch-btn');
         videos = savedVideos;
     } else {
         const token = await getAuthToken();
@@ -24,8 +22,6 @@ export default async function populatePopup() {
             storage.videos = videos;
         }
     }
-
-    updateVideosByChannelDOM();
 
     lazyLoad(matchingVideos.update());
 }
@@ -89,41 +85,4 @@ async function timeFunction(func) {
     const end = new Date();
 
     return end - start;
-}
-
-function updateVideosByChannelDOM() {
-    const videosByChannel = getVideosByChannel();
-
-    let html = '';
-    videosByChannel.forEach(video => {
-        html += `
-            <li data-channel='${video.channel}'>${video.channel} (${video.count})</li>
-        `;
-    });
-    channelList.innerHTML = html;
-}
-
-function getVideosByChannel() {
-    let hash = {};
-
-    videos.forEach(video => {
-        const channel = video.channelName;
-
-        if (channel === '') {
-            return;
-        }
-
-        if (!hash[channel]) {
-            hash[channel] = 0;
-        }
-        hash[channel]++;
-    });
-
-    let sorted = Object
-        .entries(hash)
-        .sort(([,a], [,b]) => b - a)
-        .map(([channel, count]) => ({ channel, count }))
-    ;
-
-    return sorted;
 }

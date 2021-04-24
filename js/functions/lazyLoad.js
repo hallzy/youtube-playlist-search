@@ -2,7 +2,7 @@ import videoList from '../elements/videoList.js'
 
 import updateMatchCount from '../functions/updateMatchCount.js';
 
-const videosPerLoad = 50;
+const videosPerLoad = 25;
 let videos = [];
 let nextStartIdx = 0;
 

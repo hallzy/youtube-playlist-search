@@ -12,9 +12,13 @@
         </div>
         <div class="container">
             <div id="menu">
-                <input id="query" class="search" placeholder="Search this playlist">
+                <div class='channel-filter-container'>
+                    <input type='text' class='filter channel-filter' placeholder='Channel Filter'>
+                    <div class='channel-filter-options hidden'></div>
+                </div>
+                <input class="filter title-filter" placeholder="Search this playlist">
                 <button title='Results are cached. Click fetch to retrieve the playlist from YouTube.' class='fetch'>Fetch</button>
-                <button class='view-change-btn'>By Channel</button>
+                <button class='view-change-btn hidden'>By Channel</button>
                 <div class='match-count'></div>
             </div>
             <div id="scrollable">

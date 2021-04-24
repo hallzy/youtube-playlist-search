@@ -26,8 +26,6 @@
 
     --fetch-btn-width: 55px;
     --fetch-btn-margin: 5px;
-
-    --view-change-btn-width: 86px;
 }
 
 html, body {
@@ -70,9 +68,9 @@ html, body {
     right: var(--container-border-width);
     width: calc(100% - 2 * var(--menu-padding));
 }
-#query {
+.filter {
     background-color: var(--primary-100);
-    width: calc(var(--query-width) - var(--view-change-btn-width) - 4px);
+    width: calc((var(--query-width) / 2) - 18px);
     padding: var(--input-vertical-padding) 15px;
     color: var(--primary-550);
     border: 1px solid var(--primary-200);
@@ -82,13 +80,13 @@ html, body {
     margin-top: var(--menu-padding);
 }
 
-#query.fetch-btn
-{
-    width: calc(var(--query-width) - var(--fetch-btn-width) - var(--view-change-btn-width) - 3px);
+.channel-filter-container {
+    display: inline;
 }
 
-.view-change-btn {
-    width: var(--view-change-btn-width);
+#menu.fetch-btn .filter
+{
+    width: calc((var(--query-width) - var(--fetch-btn-width)) / 2 - 18px);
 }
 
 .video-list {
@@ -102,27 +100,19 @@ html, body {
 .video-list li {
     overflow-x: hidden;
 }
-.video-list li:not(#loading):hover {
+li:not(#loading):hover {
     background-color: var(--primary-200);
 }
 
-.channel-list {
-    list-style-type: none;
-    font-weight: bold;
-    font-size: 13px;
-    cursor: pointer;
-}
-.channel-list li {
-    overflow-x: hidden;
-}
-
 #scrollable {
-    max-height: calc(var(--usable-height) - var(--menu-height));
+    --max-height: calc(var(--usable-height) - var(--menu-height));
+    max-height: var(--max-height);
+    min-height: calc(var(--max-height) - 100px);
     overflow-y: auto;
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .spinner:not(.hidden) ~ .container #scrollable {
@@ -173,7 +163,8 @@ html, body {
     height: 5em;
 }
 
-.container {
+.container,
+.channel-filter-options {
     border: var(--container-border-width) solid var(--primary-350);
 }
 
@@ -190,7 +181,7 @@ button {
     cursor: pointer;
 }
 
-#query:not(.fetch-btn) ~ .fetch
+#menu:not(.fetch-btn) .fetch
 {
     display: none;
 }
@@ -242,4 +233,22 @@ button {
     100% {
         transform: rotate(360deg);
     }
+}
+
+.channel-filter-options {
+    position: absolute;
+    min-width: 200px;
+    max-width: 50%;
+    max-height: 50%;
+    overflow-y: auto;
+    background-color: var(--primary-100);
+}
+
+.channel-filter-options li {
+    padding: 10px;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    list-style-type: none;
 }

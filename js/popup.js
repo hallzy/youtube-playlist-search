@@ -1,6 +1,7 @@
 import spinner from './objects/spinner.js';
 import playlistID from './data/playlistID.js';
 import populatePopup from './functions/populatePopup.js';
+import fetchBtn from './elements/fetchBtn.js';
 
 window.videos = [];
 

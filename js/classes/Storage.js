@@ -5,59 +5,28 @@ export default class Storage {
 
     }
 
-    get filter() {
-        return new Promise((resolve, reject) => {
-            chrome.storage.sync.get(playlistID, (result) => {
-                if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError);
-                    return reject(chrome.runtime.lastError);
-                }
-                resolve(result[playlistID] ?? '');
-            });
-        });
+    get titleFilter() {
+        return getGeneric(`TITLE_${playlistID}`, true);
     }
 
-    set filter(searchString) {
-        chrome.storage.sync.set(
-            {
-                [playlistID]: searchString,
-            },
-            (result) => {
-                if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError);
-                    alert(chrome.runtime.lastError);
-                }
-            }
-        );
+    set titleFilter(searchString) {
+        return setGeneric({ [`TITLE_${playlistID}`]: searchString }, true);
+    }
+
+    get channelFilter() {
+        return getGeneric(`CHANNEL_${playlistID}`, true);
+    }
+
+    set channelFilter(searchString) {
+        return setGeneric({ [`CHANNEL_${playlistID}`]: searchString }, true);
     }
 
     get videos() {
-        return new Promise((resolve, reject) => {
-            chrome.storage.local.get(`VIDEOS_${playlistID}`, (result) => {
-                if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError);
-                    return reject(chrome.runtime.lastError);
-                }
-                resolve(result[`VIDEOS_${playlistID}`]);
-            });
-        });
+        return getGeneric(`VIDEOS_${playlistID}`, false);
     }
 
     set videos(videos) {
-        // NOTE, there is an unlimited storage permission that I can use if needed.
-        // Currently local storage quota is 5MB. My biggest playlist is about 5kB,
-        // so there is a lot of wiggle room still.
-        chrome.storage.local.set(
-            {
-                [`VIDEOS_${playlistID}`]: videos,
-            },
-            (result) => {
-                if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError);
-                    alert(chrome.runtime.lastError);
-                }
-            }
-        );
+        return setGeneric({ [`VIDEOS_${playlistID}`]: videos }, false);
     }
 
     resetVideos() {
@@ -71,4 +40,25 @@ export default class Storage {
             });
         });
     }
+}
+
+function getGeneric(key, isSync) {
+    return new Promise((resolve, reject) => {
+        chrome.storage[isSync ? 'sync' : 'local'].get(key, (result) => {
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError);
+                return reject(chrome.runtime.lastError);
+            }
+            resolve(result[key] ?? '');
+        });
+    });
+}
+
+function setGeneric(obj, isSync) {
+    chrome.storage[isSync ? 'sync' : 'local'].set(obj, (result) => {
+        if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError);
+            alert(chrome.runtime.lastError);
+        }
+    });
 }
