@@ -5,7 +5,9 @@
 This started as a copy of the "Playlist Search For YouTube" extension, but I am
 cleaning it up and customizing it to my liking.
 
-![Screenshot](screenshot.png)
+![Screenshot 1](screenshot-1.png)
+
+![Screenshot 2](screenshot-2.png)
 
 ## Customizations
 
