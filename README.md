@@ -1,6 +1,20 @@
+# Youtube Playlist Search
+
+## Donate
+
 [![paypal](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=QMDXUKQXRT75N&currency_code=CAD)
 
-# Youtube Playlist Search
+### Crypto
+
+Click address for QR code
+
+BTC: [1QCihPNTYRKMhwW6vKjHNkGJkWzR5vdsRp](https://stmhall.ca/btc.png)
+
+ETH: [0xF7A8fed794e5ed89a294b2E6c3f1BcCa03b8ebaC](https://stmhall.ca/eth.png)
+
+LTC: [MMcQLnqeZ6zrfzhLWqwfgoEuKCd5P3ASP4](https://stmhall.ca/ltc.png)
+
+## Description
 
 This started as a copy of the "Playlist Search For YouTube" extension, but I am
 cleaning it up and customizing it to my liking.
