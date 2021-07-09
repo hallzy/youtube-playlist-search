@@ -57,6 +57,17 @@ I do not have this in the Chrome Extension Store, and I never will. Apparently
 Google requires that you pay a $5 registration fee to become an extension
 developer now and honestly, I can't be bothered.
 
+If you want to publish this extension in the Chrome Web Store, you are free to
+do so. However, I just ask that you:
+
+* Let me know first so I can update this README to say that it is being added
+* Let me know when it is approved and published so that I can post the link here
+* Let reference this git repo somewhere in the details of the extension so that
+  people can easily review the code if they want, and/or submit bug reports or
+  feature requests.
+* Try and keep the chrome extension in the store relatively up to date with the
+  repo.
+
 So, to install this extension:
 
 * Download, or clone this repository
@@ -76,3 +87,64 @@ from Google that allows the extension to retrieve information from the API.
 
 Optionally, you can now disable "Developer mode". Chrome should keep the custom
 version even after disabling.
+
+## Why this Extension is Missing from Extension Stores
+
+This extension is currently not in any extension store.
+
+You are free to add it to an extension store if you want, but if you do so I ask
+that you:
+
+* Let me know first so I can update this README to say that it is being added
+* Let me know when it is approved and published so that I can post the link here
+* Let reference this git repo somewhere in the details of the extension so that
+  people can easily review the code if they want, and/or submit bug reports or
+  feature requests.
+* Try and keep the chrome extension in the store relatively up to date with the
+  repo.
+
+There are a variety of reasons why this isn't in any extension store, which I
+will list below:
+
+### Google Chrome / Chromium Browsers
+
+I do not have this in the Chrome Extension Store because apparently Google
+requires that you pay a $5 registration fee to become an extension developer now
+and honestly, I can't be bothered, and I find it kind of insulting that I spend
+my free time to make a free extension and then I have to pay Google for the
+privilege to add it to their store.
+
+### Firefox
+
+Firefox's extension system is significantly different to Chrome, and this is a
+Chrome extension. There would be added work involved in getting it working on
+Firefox because of this.
+
+I am also not that familiar with extension development, and I don't even know if
+you can use the YouTube APIs from Google in Firefox, which I need in order for
+this extension to work.
+
+### Edge
+
+In theory, Edge should be easy to do because it is a Chromium based browser.
+
+However, I also don't know if Edge has the ability to use the YouTube API.
+
+But more importantly, I don't have any Windows computers in my home so there is
+no way for me to test if Edge even works at all.
+
+This also means that any changes I make in the future will have absolutely 0
+testing for Edge before an update.
+
+### Safari
+
+I don't know if Safari has the ability to use the YouTube API.
+
+Like Windows, I don't have any Macs in my home so there is no way for me to test
+Safari either, so there is no way to know if it would even work.
+
+This also means that any changes I make in the future will have absolutely 0
+testing for Edge before an update.
+
+I also am not familiar with Safari at all and if it even has an extension store
+or what is involved in adding it.
