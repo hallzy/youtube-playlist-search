@@ -23,6 +23,13 @@ cleaning it up and customizing it to my liking.
 
 ![Screenshot 2](screenshot-2.png)
 
+## Limitations
+
+- You must authenticate with Google when using the extension for the first time
+  so that the extension is able to use the YouTube API.
+  The YouTube API does not allow access to your "Watch List", so the extension
+  will not work on your "Watch List".
+
 ## Customizations
 
 - Searching is now more 'fuzzy', so it searches words individually instead of
@@ -62,6 +69,10 @@ So, to install this extension:
   downloaded it.
 
 You should have the extension now.
+
+When you use the extension for the first time you will be required to log in to
+a Google account. This extension uses Google's YouTube API, and requires a token
+from Google that allows the extension to retrieve information from the API.
 
 Optionally, you can now disable "Developer mode". Chrome should keep the custom
 version even after disabling.
