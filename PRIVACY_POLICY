@@ -1,0 +1,13 @@
+This Chrome extension does not collect any user data.
+
+This extension only uses the YouTube Data API to retrieve and display
+information about the playlist you are currently viewing in browser whether
+public or private.
+
+This extension also caches certain information. The channel and title filters
+that the user enters are stored with Google using Chrome sync in order for the
+extension to use the same filter as the user did last time then did a search on
+that playlist across their logged in devices.
+
+This extension also caches a list of the videos in the playlist locally on the
+user's device only for easier and faster retrieval for the extension.

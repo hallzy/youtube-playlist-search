@@ -27,7 +27,7 @@
     "https://www.youtube.com/*"
   ],
   "oauth2": {
-    "client_id": "915927501400-0ptlebbjprdfqts713hlutok1kplu2a8.apps.googleusercontent.com",
+    "client_id": "388249114202-0otd089g75shhclfo5598r4j3ul5dv45.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/youtube.readonly"
     ]
