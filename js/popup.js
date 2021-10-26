@@ -12,25 +12,14 @@ function showError(message) {
     console.error(message);
 }
 
-function isBackgroundScript() {
-    // If container doesn't exist, then this is the background script, so just
-    // ignore everything.
-    const container = document.querySelector('.container');
-    return !container;
-}
-
-(function() {
+(async function() {
     try {
-        if (isBackgroundScript()) {
-            return;
-        }
-
         if (playlistID == "WL") {
             showError("Watch Later playlist is inaccessible due to privacy concerns. Thank you for understanding.");
             return;
         }
 
-        spinner.wrapAround(populatePopup);
+        await spinner.wrapAround(populatePopup);
     } catch(err) {
         showError(err);
     }

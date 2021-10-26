@@ -2,6 +2,7 @@ import storage from '../objects/storage.js';
 import matchingVideos from '../objects/matchingVideos.js';
 
 import lazyLoad from '../functions/lazyLoad.js';
+import promiseTimeout from '../functions/promiseTimeout.js';
 
 import playlistID from '../data/playlistID.js';
 
@@ -13,6 +14,11 @@ export default async function populatePopup() {
         videos = savedVideos;
     } else {
         const token = await getAuthToken();
+
+        if (!token) {
+            throw Error("couldn't retrieve YouTube API Auth Token");
+        }
+
         const duration = await timeFunction(() => fillList(token));
 
         const oneSecond = 1000;
@@ -74,9 +80,11 @@ async function fillList(token, nextPage) {
 
 
 function getAuthToken() {
-    return new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
         chrome.identity.getAuthToken({ 'interactive': true }, token => resolve(token));
     });
+
+    return promiseTimeout(promise, 5000, "Timeout: Failed to retrieve auth token");
 }
 
 async function timeFunction(func) {
