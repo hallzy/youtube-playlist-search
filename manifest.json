@@ -5,7 +5,7 @@
   "version": "21.04.01",
   "description": "Search for videos in a YouTube™ playlist.",
   "background": {
-    "scripts": ["/js/background.js", "/js/popup.js"],
+    "scripts": ["/js/background.js"],
     "persistent": false,
     "pages": ["popup.html"]
   },
