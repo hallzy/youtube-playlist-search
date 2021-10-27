@@ -72,7 +72,8 @@ So, to install this extension:
 
 * Download, or clone this repository
 * For the 'Brave Browser' only, enable the setting "Allow Google login for
-  extensions" and restart the browser
+  extensions" and restart the browser (IMPORTANT: This feature is currently
+  broken see [below](#brave-browser))
 * Open the 'Extensions' page in Chrome settings
 * Toggle 'Developer mode' on (this should be in the top right corner)
 * Click "Load Unpacked"
@@ -87,6 +88,19 @@ from Google that allows the extension to retrieve information from the API.
 
 Optionally, you can now disable "Developer mode". Chrome should keep the custom
 version even after disabling.
+
+## Brave Browser
+
+You used to be able to use this extension with Brave Browser, but it is broken
+right now and the Brave Browser devs know about it. There isn't much they can do
+right now apart from wait for Google to do something.
+
+You can see the open Brave Browser ticket [here](https://github.com/brave/brave-browser/issues/15754).
+
+That being said, it looks like this was intentional by Google and may never get
+fixed ([ref](https://blog.chromium.org/2021/01/limiting-private-api-availability-in.html)).
+
+Thank you **SO MUCH** Google 🤦
 
 ## Why this Extension is Missing from Extension Stores
 
@@ -144,7 +158,7 @@ Like Windows, I don't have any Macs in my home so there is no way for me to test
 Safari either, so there is no way to know if it would even work.
 
 This also means that any changes I make in the future will have absolutely 0
-testing for Edge before an update.
+testing for Safari before an update.
 
 I also am not familiar with Safari at all and if it even has an extension store
 or what is involved in adding it.
