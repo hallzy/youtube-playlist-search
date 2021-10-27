@@ -50,6 +50,20 @@ async function fillList(token, nextPage) {
     const response = await fetch(requestURL, settings);
     const json = await response.json();
 
+    if (json.error) {
+        console.error(json);
+
+        const reason = json?.error?.errors?.[0]?.reason;
+        switch(reason) {
+            case 'quotaExceeded':
+                throw Error("API Quota Exceeded");
+                break;
+            default:
+                throw Error(reason);
+                break;
+        }
+    }
+
     const items = json.items ?? [];
 
     items.forEach(item => {
