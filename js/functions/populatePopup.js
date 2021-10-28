@@ -98,7 +98,8 @@ function getAuthToken() {
         chrome.identity.getAuthToken({ 'interactive': true }, token => resolve(token));
     });
 
-    return promiseTimeout(promise, 5000, "Timeout: Failed to retrieve auth token");
+    return promise;
+    // return promiseTimeout(promise, 5000, "Timeout: Failed to retrieve auth token");
 }
 
 async function timeFunction(func) {
