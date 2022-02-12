@@ -29,6 +29,16 @@ cleaning it up and customizing it to my liking.
   so that the extension is able to use the YouTube API.
   The YouTube API does not allow access to your "Watch List", so the extension
   will not work on your "Watch List".
+- This extension has turned out to be more popular than I anticipated, meaning
+  that I have run out of users for my API key. I think the only way to get more
+  users allowed is to get this verified, but I tried that a while back and it
+  was too much work and took too long (I would get automated emails from Google
+  to make a change, I would change it, not hear from them for a few days, then
+  get the request for the same change again and never actually get anywhere). As
+  a result, I will provide instructions lower down for how to create your own
+  API keys.
+    - If you try to use this extension without changing the API key, you will
+      probably see errors (REF: #7).
 
 ## Customizations
 
@@ -70,7 +80,10 @@ do so. However, I just ask that you:
 
 So, to install this extension:
 
+* Generate API Keys. For instructions on how, see [below section](#generating-api-keys).
 * Download, or clone this repository
+* Open the `manifest.json` file and replace the `client_id` with the client ID
+  you get when you generated the API Key.
 * For the 'Brave Browser' only, enable the setting "Allow Google login for
   extensions" and restart the browser (IMPORTANT: This feature is currently
   broken see [below](#brave-browser))
@@ -88,6 +101,55 @@ from Google that allows the extension to retrieve information from the API.
 
 Optionally, you can now disable "Developer mode". Chrome should keep the custom
 version even after disabling.
+
+## Generating API Keys
+
+- Go to the [Google Developer's Console](https://console.developers.google.com/).
+  You will need to login with a Google account.
+- You should see something like below. Click on the `Select a project`.
+
+![](readme-imgs/select-project.png)
+
+- Select `NEW PROJECT` in the popup.
+- You will be asked to give it a name. It doesn't matter what name you choose,
+  so long as it means something to you. For the purposes of this tutorial, I am
+  going to call it `youtube-playlist-search`.
+- Click on `create`.
+- Click `select project`.
+- You should now see something like below, which is the same as before but now
+  it shows you have selected your new project:
+
+![](readme-imgs/project-selected.png)
+
+- In the left bar there should be something that says `APIs and Services`. Hover
+  over it and click `Library` when it expands.
+- In the search box search for the `YouTube Data API v3`. When it comes up as a
+  result, click it.
+- Click `Enable`.
+- When the page loads, click `Create Credentials` in the top right corner.
+- Make sure the `YouTube Data API v3` is the selected API.
+- You need to select that the API will be accessing `User Data`.
+- Click `Next`.
+- Fill in information about the `OAuth Consent Screen`. This is the screen that
+  pops up for users when they need to allow access to this app, so provide a
+  user friendly name and your contact info.
+- Click `Save and Continue`.
+- Now select scopes. For this app you only need the `YouTube Read Only Scope`.
+  - Click `Add or Remove Scopes`. Filter for `youtube.readonly`. Check it and
+    click `Update`.
+- Your Scopes should looks like this:
+
+![](readme-imgs/scopes.png)
+
+- Click `Save and Continue`.
+- For the `Application Type`, select `Chrome App`, give it any name you want.
+- For the Application ID, enter this: `jdolgjncmhmboklhmacpknglmiibbldg`.
+- Click `Create`.
+- It may take some time, but for me took just a few seconds.
+- You should then get a `Client ID`. Copy this, you will need it when installing
+  the App.
+
+You are done creating your API Key (The Client ID).
 
 ## Brave Browser
 
