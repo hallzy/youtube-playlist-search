@@ -133,6 +133,11 @@ version even after disabling.
 - Fill in information about the `OAuth Consent Screen`. This is the screen that
   pops up for users when they need to allow access to this app, so provide a
   user friendly name and your contact info.
+  Make sure to leaving in "Testing" mode, and add your email, and the email of
+  anyone else you want to use this as "Test users":
+
+![](readme-imgs/oauth-consent-screen.png)
+
 - Click `Save and Continue`.
 - Now select scopes. For this app you only need the `YouTube Read Only Scope`.
   - Click `Add or Remove Scopes`. Filter for `youtube.readonly`. Check it and
